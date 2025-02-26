@@ -6,15 +6,14 @@ namespace ApiPeliculas.Modelos
     public class Pelicula
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-
-        [Required]
         public string Nombre { get; set; }
         public string RutaImagen { get; set; }
         public string Descripcion { get; set; }
         public int Duracion { get; set; }
         public enum TipoClasificacion { Siete, Trece, Dieciseis, Dieciocho }
-        TipoClasificacion Clasificacion { get; se t; }
+        public TipoClasificacion Clasificacion { get; set; }
         public DateTime FechaCreacion { get; set; }
 
         // Clave foránea que hace referencia a la entidad 'Categoria'

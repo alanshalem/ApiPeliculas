@@ -2,6 +2,7 @@
 using ApiPeliculas.Modelos.Dtos;  // Espacio de nombres que contiene los DTOs (Data Transfer Objects) de la API
 using ApiPeliculas.Repositorio.IRepositorio;  // Espacio de nombres que contiene la interfaz del repositorio de categorías
 using AutoMapper;  // Espacio de nombres que proporciona AutoMapper para realizar conversiones de objetos
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;  // Espacio de nombres de ASP.NET Core que permite la creación de controladores de API
 
 namespace ApiPeliculas.Controllers
@@ -14,7 +15,7 @@ namespace ApiPeliculas.Controllers
     public class CategoriasController : ControllerBase
     {
         // Declaración de una variable readonly para almacenar la referencia al repositorio de categorías.
-        public readonly ICategoriaRepositorio _categoriaRepositorio;
+        private readonly ICategoriaRepositorio _categoriaRepositorio;
 
         // Declaración de una variable readonly para almacenar la referencia a AutoMapper, que se usará para mapear entre entidades y DTOs.
         private readonly IMapper _mapper;
@@ -29,10 +30,13 @@ namespace ApiPeliculas.Controllers
             _mapper = mapper;
         }
 
+        #region Consultas
         #region GetCategorias
         // Método para manejar las solicitudes GET a la ruta 'api/Categorias'.
         // Este método retorna todas las categorías disponibles en la base de datos.
+        [AllowAnonymous]
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)] 
         public IActionResult GetCategorias()
@@ -53,6 +57,7 @@ namespace ApiPeliculas.Controllers
         #endregion
 
         #region GetCategoria
+        [AllowAnonymous]
         [HttpGet("{categoriaId:int}", Name = "GetCategoria" )]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -70,8 +75,11 @@ namespace ApiPeliculas.Controllers
             return Ok(itemCategoriaDto);
         }
         #endregion
+        #endregion
 
+        #region Operaciones CRUD
         #region CrearCategoria
+        [Authorize(Roles = "admin")]
         [HttpPost] // Indica que esta acción manejará las solicitudes HTTP POST
         [ProducesResponseType(201, Type = typeof(CategoriaDto))] // Responde con código 201 y un objeto CategoriaDto si la creación es exitosa
         [ProducesResponseType(StatusCodes.Status400BadRequest)] // Responde con código 400 si hay un error de validación
@@ -112,8 +120,9 @@ namespace ApiPeliculas.Controllers
             return CreatedAtRoute("GetCategoria", new { categoriaId = categoria.Id }, categoria); // Responde con la URL de la nueva categoría y los detalles de la misma
         }
         #endregion
-        
+
         #region ActualizarPatchCategoria
+        [Authorize(Roles = "admin")]
         [HttpPatch("{categoriaId:int}", Name  = "ActualizarPatchCategoria")] // Indica que esta acción manejará las solicitudes HTTP POST
         [ProducesResponseType(201, Type = typeof(CategoriaDto))] // Responde con código 201 y un objeto CategoriaDto si la creación es exitosa
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -146,8 +155,8 @@ namespace ApiPeliculas.Controllers
         }
         #endregion
 
-
         #region BorrarCategoria
+        [Authorize(Roles = "admin")]
         [HttpDelete("{categoriaId:int}", Name = "BorrarCategoria")] // Indica que esta acción manejará las solicitudes HTTP POST
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -173,6 +182,7 @@ namespace ApiPeliculas.Controllers
             return NoContent();
         }
 
+        #endregion
         #endregion
     }
 }
